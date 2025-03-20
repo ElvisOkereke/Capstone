@@ -65,7 +65,7 @@ cache_dir = "YOUR_PREFERRED_PATH"
 
 Run the main script:
 ```bash
-python TestFlanT5.py
+python Seq2Seq_Model_Test.py
 ```
 
 ### Custom Configuration
