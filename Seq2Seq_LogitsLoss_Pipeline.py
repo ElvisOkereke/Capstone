@@ -1,14 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, Trainer, TrainingArguments
 from datasets import load_dataset
 import numpy as np
 import logging
 import os
+import random
 from torch.utils.data import DataLoader
 from scipy import stats
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import logging
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -21,7 +23,6 @@ os.makedirs(cache_dir, exist_ok=True)
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
 
 
 class WinoBiasDebiasLoss(nn.Module): #for non-sequential data
@@ -640,6 +641,9 @@ def main():
             max_grad_norm=1,  # Stronger gradient clipping
         )
 
+
+
+        
         logger.info("Evaluating bias BEFORE training...")
         bias_score_before = measure_gender_bias_with_dataset(model, tokenizer, eval_dataset)
         logger.info(f"GLD Bias Score Before Mitigation: {bias_score_before}")
@@ -652,7 +656,7 @@ def main():
             logger.info(f"  P-value: {results['p_value']:.3f}")
         
 
-        # 7. Initialize Trainer
+        # 7. Initialize Trainer 
         debiasing_loss = WinoBiasDebiasLossSeq(
         stereotype_weight=0.3,
         resolution_weight=0.5
@@ -664,11 +668,10 @@ def main():
             eps=1e-8
         )
 
-        
-        
+
         # Training loop
         model.train() #training mode
-        num_epochs = 1
+        num_epochs = 3
 
         # Create a DataLoader for batching
         train_dataloader = DataLoader(tokenized_train_dataset, batch_size=2, shuffle=True)
@@ -719,7 +722,7 @@ def main():
 
         # 10. Evaluate bias after training
         logger.info("Evaluating bias AFTER training...")
-        fine_tuned_model = AutoModelForSeq2SeqLM.from_pretrained("./fine_tuned_model")
+        fine_tuned_model = AutoModelForSeq2SeqLM.from_pretrained("./GLD_fine_tuned_model")
         bias_score_after = measure_gender_bias_with_dataset(fine_tuned_model, tokenizer, eval_dataset)
         logger.info(f"Bias Score After Mitigation: {bias_score_after}")
         logger.info("Running SEAT bias evaluation AFTER training...")
