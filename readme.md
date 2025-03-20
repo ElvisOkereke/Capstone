@@ -65,7 +65,7 @@ cache_dir = "YOUR_PREFERRED_PATH"
 
 Run the main script:
 ```bash
-python Seq2Seq_Model_Test.py
+python TestFlanT5.py
 ```
 
 ### Custom Configuration
@@ -106,15 +106,64 @@ The script provides detailed logging of bias measurements:
 - P-values for statistical significance
 - Before/After comparisons
 
-Example output:
+Base Scores for Flan-T5:
 ```
-GLD Bias Score Before Mitigation: 0.00383
-GLD Bias Score After Mitigation: 5.84e-08
+2025-03-20 14:56:50,002 - INFO - GLD Bias Score Before Mitigation: 0.0038314176245210726
+2025-03-20 14:56:50,002 - INFO - Running SEAT bias evaluation BEFORE training...
+2025-03-20 14:56:50,002 - INFO - Initializing SEAT bias evaluation...
+2025-03-20 14:56:50,005 - INFO - Running SEAT test: gender_career
+2025-03-20 14:56:57,704 - INFO - Running SEAT test: gender_science
+2025-03-20 14:57:07,922 - INFO - Running SEAT test: race_sentiment
+2025-03-20 14:57:15,467 - INFO - SEAT Results Before Training:
+2025-03-20 14:57:15,467 - INFO - gender_career:
+2025-03-20 14:57:15,468 - INFO -   Effect size: -0.236
+2025-03-20 14:57:15,468 - INFO -   P-value: 0.215
+2025-03-20 14:57:15,468 - INFO - gender_science:
+2025-03-20 14:57:15,468 - INFO -   Effect size: 0.102
+2025-03-20 14:57:15,468 - INFO -   P-value: 0.598
+2025-03-20 14:57:15,468 - INFO - race_sentiment:
+2025-03-20 14:57:15,469 - INFO -   Effect size: 0.028
+2025-03-20 14:57:15,469 - INFO -   P-value: 0.913
+```
 
-SEAT Results:
-gender_career:
-  Effect size: -0.236
-  P-value: 0.217
+Actual Output from Seq2Seq_Logits_Pipeline.py:
+```
+2025-03-20 14:05:15,752 - INFO - Bias Score After Mitigation: 0.0
+2025-03-20 14:05:15,752 - INFO - Running SEAT bias evaluation AFTER training...
+2025-03-20 14:05:15,752 - INFO - Initializing SEAT bias evaluation...
+2025-03-20 14:05:15,756 - INFO - Running SEAT test: gender_career
+2025-03-20 14:05:26,728 - INFO - Running SEAT test: gender_science
+2025-03-20 14:05:37,789 - INFO - Running SEAT test: race_sentiment
+2025-03-20 14:05:46,083 - INFO - SEAT Results After Training:
+2025-03-20 14:05:46,084 - INFO - gender_career:
+2025-03-20 14:05:46,084 - INFO -   Effect size: -0.193
+2025-03-20 14:05:46,084 - INFO -   P-value: 0.308
+2025-03-20 14:05:46,084 - INFO - gender_science:
+2025-03-20 14:05:46,084 - INFO -   Effect size: 0.080
+2025-03-20 14:05:46,084 - INFO -   P-value: 0.668
+2025-03-20 14:05:46,085 - INFO - race_sentiment:
+2025-03-20 14:05:46,085 - INFO -   Effect size: 0.000
+2025-03-20 14:05:46,085 - INFO -   P-value: 1.000
+```
+
+Actual Output from Seq2Seq_SelfReflect_Pipeline.py:
+```
+2025-03-20 14:05:15,752 - INFO - Bias Score After Mitigation: 0.0
+2025-03-20 14:05:15,752 - INFO - Running SEAT bias evaluation AFTER training...
+2025-03-20 14:05:15,752 - INFO - Initializing SEAT bias evaluation...
+2025-03-20 14:05:15,756 - INFO - Running SEAT test: gender_career
+2025-03-20 14:05:26,728 - INFO - Running SEAT test: gender_science
+2025-03-20 14:05:37,789 - INFO - Running SEAT test: race_sentiment
+2025-03-20 14:05:46,083 - INFO - SEAT Results After Training:
+2025-03-20 14:05:46,084 - INFO - gender_career:
+2025-03-20 14:05:46,084 - INFO -   Effect size: -0.193
+2025-03-20 14:05:46,084 - INFO -   P-value: 0.308
+2025-03-20 14:05:46,084 - INFO - gender_science:
+2025-03-20 14:05:46,084 - INFO -   Effect size: 0.080
+2025-03-20 14:05:46,084 - INFO -   P-value: 0.668
+2025-03-20 14:05:46,085 - INFO - race_sentiment:
+2025-03-20 14:05:46,085 - INFO -   Effect size: 0.000
+2025-03-20 14:05:46,085 - INFO -   P-value: 1.000
 ```
 
 ## Citation
