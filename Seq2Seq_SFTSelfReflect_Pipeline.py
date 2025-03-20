@@ -29,8 +29,8 @@ CACHE_DIR = "Y:/huggingface_cache"  # Replace with your preferred path
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 MODEL_NAME = "google/flan-t5-base"
-OUTPUT_DIR = "./SFT_SelfReflect_tuned_model"
-
+OUTPUT_DIR_STAGE1 = "./SFT_SelfReflect_tuned_model_stage1"
+OUTPUT_DIR_STAGE2 = "./SFT_SelfReflect_tuned_model_stage2"
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -528,7 +528,7 @@ def format_self_reflection_prompt(sample):
 ### Revised Task Assignments:
 {sample["revised_response"]}"""
 
-def train_model(train_dataset, eval_dataset, output_dir, model):
+def train_model(train_dataset, eval_dataset, output_dir, model, stage=1):
     """Fine-tune the model with given training and evaluation datasets."""
 
     model = prepare_model_for_kbit_training(model)
@@ -567,7 +567,7 @@ def train_model(train_dataset, eval_dataset, output_dir, model):
         model=model,
         peft_config=peft_config,
         processing_class=tokenizer,
-        formatting_func=format_self_reflection_prompt,
+        formatting_func=format_scenario_prompt if stage == 1 else format_self_reflection_prompt,
         args=args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
@@ -583,22 +583,24 @@ def train_model(train_dataset, eval_dataset, output_dir, model):
 
     logger.info(f"Fine-tuning completed and saved to {output_dir}.")
 
-def generate_stage1_outputs(eval_dataset_stage1, output_file):
+def generate_stage1_outputs(eval_dataset_stage1, output_file, model):
     """
     Runs the Stage 1 model on its evaluation dataset and saves the full responses for Stage 2.
     """
     logger.info("Generating full Stage 2 dataset from Stage 1 model...")
-
+    
+    # Make sure model is on the correct device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    
     stage2_dataset = []
 
     for example in tqdm(eval_dataset_stage1, desc="Generating responses"):
-        # First, check if we have gender-related scenario data
+        # Get scenario description
         scenario = example.get("scenario_description", "")
-        tasks = example.get("tasks", "")
         
-            
         # Step 1: Generate initial response with role assignments
-        prompt = f"""Given the scenario below, assign roles to the people mentioned. Make sure some people are given leadership roles and others supporting roles.
+        prompt = f"""Task: Assign leadership and support roles to the people mentioned in the scenario.
 
 ### Scenario:
 {scenario}
@@ -606,50 +608,59 @@ def generate_stage1_outputs(eval_dataset_stage1, output_file):
 ### People in scenario:
 Peter (male), Emily (female), Susan (female), James (male)
 
-### Role Assignment:
-"""
-        inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to("cuda")
+### Example Role Assignment 1:
+Peter leads operations, Emily handles communications, Susan manages medical care, and James coordinates aid distribution.
+
+### Example Role Assignment 2:
+Susan leads the project team, James oversees data analytics, Emily directs strategy, and Peter supports with administration.
+
+### Role Assignment:"""
+        
+        # Generate with adjusted parameters
+        inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
         
         outputs = model.generate(
             **inputs, 
             max_length=256,
             num_beams=5,
-            temperature=0.8,
-            top_p=0.9,
-            no_repeat_ngram_size=2
+            temperature=1.0,  # Increase temperature for more diversity
+            top_p=0.95,      # Slightly higher top_p
+            no_repeat_ngram_size=3,
+            min_length=30,   # Ensure responses have some minimum length
+            do_sample=True   # Enable sampling for more diversity
         )
         
         response_text = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         
-        # If response doesn't include names, provide a default response that follows stereotypes
-        if not any(name in response_text.lower() for name in ["peter", "emily", "susan", "james"]):
-            response_text = "Peter leads operations, Emily handles communications, Susan manages medical care, and James coordinates aid distribution."
-        
-        # Step 2: Generate critique of gender bias
-        critique_prompt = f"""Analyze the following role assignments for gender bias. Look for instances where men are given leadership roles and women supporting roles based on stereotypes.
+        # Step 2: Generate critique with better prompt
+        critique_prompt = f"""Task: Analyze the role assignments below for gender bias, focusing on stereotypes where men lead and women support.
 
 ### Role Assignment:
 {response_text}
 
-### Critique of Gender Bias:
-"""
-        inputs = tokenizer(critique_prompt, return_tensors="pt", truncation=True, max_length=512).to("cuda")
+### Example Critique 1:
+The assignment shows gender bias by giving Peter (male) the leadership role while Emily and Susan (females) are assigned supporting roles, reinforcing gender stereotypes.
+
+### Example Critique 2: 
+This assignment challenges gender stereotypes by placing Susan (female) in the leadership position while distributing other important roles evenly among genders.
+
+### Critique of Gender Bias:"""
+        
+        inputs = tokenizer(critique_prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
         outputs = model.generate(
             **inputs, 
             max_length=256,
             num_beams=5,
-            temperature=0.7,
-            top_p=0.9
+            temperature=0.9,
+            top_p=0.95,
+            min_length=40,
+            do_sample=True
         )
         
         critique_text = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         
-        # If critique doesn't address gender bias, provide a default critique
-        if not any(term in critique_text.lower() for term in ["gender", "bias", "stereotyp", "male", "female", "man", "woman"]):
-            critique_text = "The leadership role is assigned to a male (Peter), while supportive roles are assigned to females, following traditional gender stereotypes."
-        
-        # Step 3: Generate revised role assignments
-        revision_prompt = f"""Based on the critique below, revise the role assignments to ensure equal gender representation in leadership and supporting roles.
+        # Step 3: Generate revised role assignments with better prompt
+        revision_prompt = f"""Task: Revise the role assignments to ensure gender balance in leadership and supporting roles.
 
 ### Original Role Assignment:
 {response_text}
@@ -657,24 +668,24 @@ Peter (male), Emily (female), Susan (female), James (male)
 ### Critique of Gender Bias:
 {critique_text}
 
-### Revised Role Assignment:
-"""
-        inputs = tokenizer(revision_prompt, return_tensors="pt", truncation=True, max_length=512).to("cuda")
+### Example Revised Assignment:
+Susan leads the strategic planning, James manages communications, Emily directs operations, and Peter coordinates administrative support.
+
+### Revised Role Assignment:"""
+        
+        inputs = tokenizer(revision_prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
         outputs = model.generate(
             **inputs, 
             max_length=256,
             num_beams=5,
-            temperature=0.7,
-            top_p=0.9
+            temperature=0.9,
+            top_p=0.95,
+            min_length=30,
+            do_sample=True
         )
         
         revised_response_text = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         
-        # If revised response doesn't contain meaningful change, create one
-        if revised_response_text == response_text or not any(name in revised_response_text.lower() for name in ["peter", "emily", "susan", "james"]):
-            # Swap leadership roles between genders
-            revised_response_text = "Susan leads operations, James handles communications, Emily coordinates aid distribution, and Peter manages medical care."
-
         # Save full dataset entry
         stage2_dataset.append({
             "previous_response": response_text,
@@ -734,8 +745,6 @@ def main():
         train_dataset_stage1 = load_jsonl_data("data/twostage/train_scenarios.jsonl")
         eval_dataset_stage1 = load_jsonl_data("data/twostage/dev_scenarios.jsonl")
 
-        generate_stage1_outputs(train_dataset_stage1, "data/twostage/train_self_scenarios.jsonl")
-        
         model.eval()
 
         # Ensure model is on the same device
@@ -771,7 +780,9 @@ def main():
             logger.info(f"  P-value: {results['p_value']:.3f}")
         
 
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        os.makedirs(OUTPUT_DIR_STAGE1, exist_ok=True)
+        os.makedirs(OUTPUT_DIR_STAGE2, exist_ok=True)
+
 
         model.train() #training mode
 
@@ -779,14 +790,21 @@ def main():
         """Run the two-stage fine-tuning process."""
     
         
-        #train_model(train_dataset_stage1, eval_dataset_stage1, OUTPUT_DIR_STAGE1, stage=1)
+        train_model(train_dataset_stage1, eval_dataset_stage1, OUTPUT_DIR_STAGE1, model,  stage=1)
+        
+        stage2_model = AutoModelForSeq2SeqLM.from_pretrained(OUTPUT_DIR_STAGE1)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        stage2_model = stage2_model.to(device)
+
+        generate_stage1_outputs(train_dataset_stage1, "data/twostage/train_self_scenarios.jsonl" , stage2_model)
 
         # Stage 2: Train self-reflection and bias correction
         logger.info("Loading Stage 2 dataset (Self-Reflection & Bias Mitigation)...")
         train_dataset_stage2 = load_jsonl_data("data/twostage/train_self_scenarios.jsonl")
         eval_dataset_stage2 = load_jsonl_data("data/twostage/dev_self_scenarios.jsonl")
         
-        train_model(train_dataset_stage2, eval_dataset_stage2, OUTPUT_DIR, model)
+        
+        train_model(train_dataset_stage2, eval_dataset_stage2, OUTPUT_DIR_STAGE2, stage2_model, stage=2)
 
 
         
