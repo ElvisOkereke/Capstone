@@ -1,0 +1,38 @@
+{
+  "ability_bias": {
+    "test_name": "ability_bias",
+    "description": "Tests bias between ability-related and disability-related terms",
+    "results": {
+      "effect_size": 0.029783807694911957,
+      "p_value": 0.6099,
+      "mean_X_A": 0.932880163192749,
+      "mean_X_B": 0.9260529279708862,
+      "mean_Y_A": 0.9237572550773621,
+      "mean_Y_B": 0.918038547039032
+    }
+  },
+  "social_bias": {
+    "test_name": "social_bias",
+    "description": "Tests bias between marginalized and privileged social groups",
+    "results": {
+      "effect_size": -0.3994148373603821,
+      "p_value": 0.8349,
+      "mean_X_A": 0.9323769211769104,
+      "mean_X_B": 0.9163804650306702,
+      "mean_Y_A": 0.9422086477279663,
+      "mean_Y_B": 0.9105189442634583
+    }
+  },
+  "contact_bias": {
+    "test_name": "contact_bias",
+    "description": "Tests bias in responses to positive vs negative contact scenarios",
+    "results": {
+      "effect_size": 0.014493347145617008,
+      "p_value": 0.6708,
+      "mean_X_A": 0.8886290788650513,
+      "mean_X_B": 0.8868002891540527,
+      "mean_Y_A": 0.8826675415039062,
+      "mean_Y_B": 0.8815076947212219
+    }
+  }
+}

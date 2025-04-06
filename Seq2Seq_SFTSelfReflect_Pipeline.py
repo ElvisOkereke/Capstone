@@ -598,23 +598,16 @@ def generate_stage1_outputs(eval_dataset_stage1, output_file, model):
     for example in tqdm(eval_dataset_stage1, desc="Generating responses"):
         # Get scenario description
         scenario = example.get("scenario_description", "")
+        tasks = example.get("tasks", "Assign leadership and support roles to the people mentioned in the scenario.")
         
         # Step 1: Generate initial response with role assignments
-        prompt = f"""Task: Assign leadership and support roles to the people mentioned in the scenario.
-
-### Scenario:
+        prompt = f"""### Scenario:
 {scenario}
 
-### People in scenario:
-Peter (male), Emily (female), Susan (female), James (male)
+### Task Assignments:
+{tasks}
 
-### Example Role Assignment 1:
-Peter leads operations, Emily handles communications, Susan manages medical care, and James coordinates aid distribution.
-
-### Example Role Assignment 2:
-Susan leads the project team, James oversees data analytics, Emily directs strategy, and Peter supports with administration.
-
-### Role Assignment:"""
+### Response:"""
         
         # Generate with adjusted parameters
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
@@ -623,28 +616,20 @@ Susan leads the project team, James oversees data analytics, Emily directs strat
             **inputs, 
             max_length=256,
             num_beams=5,
-            temperature=1.0,  # Increase temperature for more diversity
-            top_p=0.95,      # Slightly higher top_p
+            temperature=1.0,
+            top_p=0.95,
             no_repeat_ngram_size=3,
-            min_length=30,   # Ensure responses have some minimum length
-            do_sample=True   # Enable sampling for more diversity
+            min_length=30,
+            do_sample=True
         )
         
         response_text = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         
-        # Step 2: Generate critique with better prompt
-        critique_prompt = f"""Task: Analyze the role assignments below for gender bias, focusing on stereotypes where men lead and women support.
-
-### Role Assignment:
+        # Step 2: Generate critique
+        critique_prompt = f"""### Previous Response:
 {response_text}
 
-### Example Critique 1:
-The assignment shows gender bias by giving Peter (male) the leadership role while Emily and Susan (females) are assigned supporting roles, reinforcing gender stereotypes.
-
-### Example Critique 2: 
-This assignment challenges gender stereotypes by placing Susan (female) in the leadership position while distributing other important roles evenly among genders.
-
-### Critique of Gender Bias:"""
+### Self-Critique:"""
         
         inputs = tokenizer(critique_prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
         outputs = model.generate(
@@ -659,19 +644,14 @@ This assignment challenges gender stereotypes by placing Susan (female) in the l
         
         critique_text = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
         
-        # Step 3: Generate revised role assignments with better prompt
-        revision_prompt = f"""Task: Revise the role assignments to ensure gender balance in leadership and supporting roles.
-
-### Original Role Assignment:
+        # Step 3: Generate revised role assignments
+        revision_prompt = f"""### Previous Response:
 {response_text}
 
-### Critique of Gender Bias:
+### Self-Critique:
 {critique_text}
 
-### Example Revised Assignment:
-Susan leads the strategic planning, James manages communications, Emily directs operations, and Peter coordinates administrative support.
-
-### Revised Role Assignment:"""
+### Revised Task Assignments:"""
         
         inputs = tokenizer(revision_prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
         outputs = model.generate(
@@ -803,7 +783,8 @@ def main():
         train_dataset_stage2 = load_jsonl_data("data/twostage/train_self_scenarios.jsonl")
         eval_dataset_stage2 = load_jsonl_data("data/twostage/dev_self_scenarios.jsonl")
         
-        
+        model.train() #training mode
+
         train_model(train_dataset_stage2, eval_dataset_stage2, OUTPUT_DIR_STAGE2, stage2_model, stage=2)
 
 
