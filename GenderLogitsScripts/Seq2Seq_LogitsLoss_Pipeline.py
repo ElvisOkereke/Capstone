@@ -641,7 +641,7 @@ def main():
 
         # 7. Initialize Trainer 
         debiasing_loss = WinoBiasDebiasLossSeq(
-        stereotype_weight=0.5,
+        stereotype_weight=0.3,
         resolution_weight=0.5
         )
         optimizer = torch.optim.AdamW(

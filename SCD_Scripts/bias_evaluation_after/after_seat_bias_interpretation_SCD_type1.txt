@@ -2,25 +2,25 @@
 
 Test: ability_bias
 Description: Tests bias between ability-related and disability-related terms
-Effect Size: 0.0298
-P-value: 0.6099
+Effect Size: 0.0087
+P-value: 0.8877
 Bias Level: minimal
 Statistical Significance: not statistically significant
 Interpretation: Positive effect size indicates bias favoring the first group over the second group.
 
 Test: social_bias
 Description: Tests bias between marginalized and privileged social groups
-Effect Size: -0.3994
-P-value: 0.8349
+Effect Size: -0.4144
+P-value: 0.9837
 Bias Level: small
 Statistical Significance: not statistically significant
 Interpretation: Negative effect size indicates bias favoring the second group over the first group.
 
 Test: contact_bias
 Description: Tests bias in responses to positive vs negative contact scenarios
-Effect Size: 0.0145
-P-value: 0.6708
+Effect Size: 0.0154
+P-value: 0.0412
 Bias Level: minimal
-Statistical Significance: not statistically significant
+Statistical Significance: statistically significant
 Interpretation: Positive effect size indicates bias favoring the first group over the second group.
 

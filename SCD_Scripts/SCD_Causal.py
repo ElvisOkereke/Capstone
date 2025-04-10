@@ -17,6 +17,7 @@ import os
 from tqdm import tqdm
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from trl import SFTTrainer, SFTConfig
+from transformers import BitsAndBytesConfig
 
 
 # --- 1. Load Your Dataset ---
@@ -24,7 +25,7 @@ from trl import SFTTrainer, SFTConfig
 # Adjust the path and separator as needed.
 try:
     
-    file_path = 'type1_dataset.csv'
+    file_path = 'type2_dataset.csv'
     df = pd.read_csv(file_path)
     print(f"Successfully loaded data from {file_path}")
     print(f"Dataset shape: {df.shape}")
@@ -231,9 +232,8 @@ def initialize_model_and_tokenizer(model_name, cache_dir="Y:/huggingface_cache",
     
     # Check if CUDA is available
     use_cuda = torch.cuda.is_available()
+    print (f"Using CUDA: {use_cuda}")
     
-    # Import BitsAndBytesConfig
-    from transformers import BitsAndBytesConfig
     
     # Configure quantization
     if use_cuda:
@@ -848,15 +848,15 @@ def main():
     args = SFTConfig(
         optim="adamw_bnb_8bit",
         output_dir=output_dir,
-        num_train_epochs=3,
-        per_device_train_batch_size=8,
-        gradient_accumulation_steps=4,  # Increased to compensate for smaller batch size
+        num_train_epochs=5, #going to try adding more epochs starting at 3
+        per_device_train_batch_size=8, #8 is a good starting point 
+        gradient_accumulation_steps=4,  
         warmup_steps=1,
         logging_steps=10,
         save_strategy="epoch",
         eval_strategy="epoch",
         eval_steps=20,
-        learning_rate=2e-5,
+        learning_rate=2e-5, # decreasing from 1e-3 to 2e-5 gave good gain in the bias metrics
         bf16=True,
         lr_scheduler_type='constant',
         max_seq_length=512,

@@ -1,25 +1,25 @@
-=== SEAT Bias Test Results Interpretation ===
+=== SEAT Bias Before Test Results Interpretation ===
 
 Test: ability_bias
 Description: Tests bias between ability-related and disability-related terms
-Effect Size: 0.0148
-P-value: 0.7281
+Effect Size: 0.0298
+P-value: 0.6099
 Bias Level: minimal
 Statistical Significance: not statistically significant
 Interpretation: Positive effect size indicates bias favoring the first group over the second group.
 
 Test: social_bias
 Description: Tests bias between marginalized and privileged social groups
-Effect Size: -0.4406
-P-value: 0.3893
+Effect Size: -0.3994
+P-value: 0.8349
 Bias Level: small
 Statistical Significance: not statistically significant
 Interpretation: Negative effect size indicates bias favoring the second group over the first group.
 
 Test: contact_bias
 Description: Tests bias in responses to positive vs negative contact scenarios
-Effect Size: 0.0212
-P-value: 0.6900
+Effect Size: 0.0145
+P-value: 0.6708
 Bias Level: minimal
 Statistical Significance: not statistically significant
 Interpretation: Positive effect size indicates bias favoring the first group over the second group.
