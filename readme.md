@@ -1,4 +1,4 @@
-# SEQUENCE-TO-SEQUENCE Model Debiasing Framework
+# LLM Model Debiasing Framework
 
 A Python-based framework for measuring and mitigating gender and social biases in Open Source language models using multiple debiasing techniques and evaluation metrics.
 
