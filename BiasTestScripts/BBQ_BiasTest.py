@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Script to evaluate a locally saved Hugging Face Causal LM on the BBQ benchmark.
 

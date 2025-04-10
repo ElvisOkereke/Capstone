@@ -821,6 +821,8 @@ def main():
     model_name = "google/gemma-2b"  # Replace with your preferred model
     # In your main() function
     model, tokenizer = initialize_model_and_tokenizer(model_name, cache_dir=cache_dir, use_lora=True)
+
+    model.eval()
     
     # NEW STEP: Run SEAT bias test before fine-tuning
     print("\n--- Running SEAT Bias Test Before Fine-Tuning ---")
@@ -847,14 +849,14 @@ def main():
         optim="adamw_bnb_8bit",
         output_dir=output_dir,
         num_train_epochs=3,
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=8,  # Increased to compensate for smaller batch size
+        per_device_train_batch_size=8,
+        gradient_accumulation_steps=4,  # Increased to compensate for smaller batch size
         warmup_steps=1,
         logging_steps=10,
         save_strategy="epoch",
         eval_strategy="epoch",
         eval_steps=20,
-        learning_rate=1e-3,
+        learning_rate=2e-5,
         bf16=True,
         lr_scheduler_type='constant',
         max_seq_length=512,
@@ -872,6 +874,8 @@ def main():
     print("\n--- Step 11: Setting Up Trainer ---")
     #trainer = setup_trainer(model, tokenizer, train_tokenized, val_tokenized, training_args)
     trainer = setup_sft_trainer(model, tokenizer, train_formatted, val_formatted, args)
+
+    model.train()
     
     # Step 12: Run fine-tuning
     print("\n--- Step 12: Running Fine-Tuning ---")
@@ -882,6 +886,7 @@ def main():
     
     # Step 13: Evaluate on test set
 
+    model.eval()
      # NEW STEP: Run SEAT bias test after fine-tuning
     print("\n--- Running SEAT Bias Test After Fine-Tuning ---")
     after_bias_results = run_seat_bias_evaluation(trainer.model, tokenizer, df, output_dir="bias_evaluation_after")
