@@ -1,0 +1,36 @@
+=== RESULT [gpt2, identity_attack] ===
+{'test_pearsonr': np.float64(-0.1594533534447058), 'test_accuracy': 0.5737, 'dev_pearsonr': np.float64(-0.14928977187916248), 'dev_accuracy': 0.571}
+
+=== RESULT [gpt2, profanity] ===
+{'test_pearsonr': np.float64(-0.22042335817396697), 'test_accuracy': 0.5, 'dev_pearsonr': np.float64(-0.2085423468762294), 'dev_accuracy': 0.5}
+
+=== RESULT [gpt2, severe_toxicity] ===
+{'test_pearsonr': np.float64(-0.16829723645251182), 'test_accuracy': 0.52435, 'dev_pearsonr': np.float64(-0.16084244001336764), 'dev_accuracy': 0.5245}
+
+=== RESULT [gpt2, sexually_explicit] ===
+{'test_pearsonr': np.float64(-0.12117611440388562), 'test_accuracy': 0.5871, 'dev_pearsonr': np.float64(-0.12618879822881846), 'dev_accuracy': 0.584}
+
+=== RESULT [gpt2, threat] ===
+{'test_pearsonr': np.float64(0.0011336370105145812), 'test_accuracy': 0.53735, 'dev_pearsonr': np.float64(0.018694812383130886), 'dev_accuracy': 0.545}
+
+=== RESULT [gpt2, toxicity] ===
+{'test_pearsonr': np.float64(-0.1327344170341706), 'test_accuracy': 0.5021, 'dev_pearsonr': np.float64(-0.1033926432595569), 'dev_accuracy': 0.5025}
+
+=== RESULT [gpt2-medium, identity_attack] ===
+{'test_pearsonr': np.float64(0.13297166623448536), 'test_accuracy': 0.5787, 'dev_pearsonr': np.float64(0.1304250652099136), 'dev_accuracy': 0.578}
+
+=== RESULT [gpt2-medium, profanity] ===
+{'test_pearsonr': np.float64(0.022703512268434797), 'test_accuracy': 0.5251, 'dev_pearsonr': np.float64(0.05382572913069298), 'dev_accuracy': 0.532}
+
+=== RESULT [gpt2-medium, severe_toxicity] ===
+{'test_pearsonr': np.float64(-0.030074847217797157), 'test_accuracy': 0.52465, 'dev_pearsonr': np.float64(-0.05776282167633526), 'dev_accuracy': 0.5245}
+
+=== RESULT [gpt2-medium, sexually_explicit] ===
+{'test_pearsonr': np.float64(0.09701902642796637), 'test_accuracy': 0.58875, 'dev_pearsonr': np.float64(0.09757151255983915), 'dev_accuracy': 0.59}
+
+=== RESULT [gpt2-medium, threat] ===
+{'test_pearsonr': np.float64(0.1255540994173622), 'test_accuracy': 0.56075, 'dev_pearsonr': np.float64(0.13447935173899433), 'dev_accuracy': 0.5655}
+
+=== RESULT [gpt2-medium, toxicity] ===
+{'test_pearsonr': np.float64(0.1089893227676033), 'test_accuracy': 0.54245, 'dev_pearsonr': np.float64(0.13427021536291198), 'dev_accuracy': 0.552}
+
