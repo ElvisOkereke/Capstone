@@ -143,10 +143,3 @@ If you use this codebase or refer to our work, please cite:
 ```
 Ahsan, M., Haider, A., Nguyen, M., & Okereke, E. (2025). Bias Measurement and Mitigation in Large Language Models. Toronto Metropolitan University Capstone Design Project.
 ```
-
-## Contact
-For questions or inquiries, contact:
-- Mehdi Ahsan: mehdi.ahsan@torontomu.ca
-- Azan Haider: azan.haider@torontomu.ca
-- Michael Nguyen: hiepvan.nguyen@torontomu.ca
-- Elvis Okereke: eokereke@torontomu.ca
